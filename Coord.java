@@ -1,4 +1,4 @@
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.lang.Math;
 
 public class Coord {
@@ -10,8 +10,8 @@ public class Coord {
 		this.y = y;
 	}
 
-	public int getNearest(LinkedList<Coord> list) {
-		Coord result = list.getFirst();
+	public int getNearest(ArrayList<Coord> list) {
+		Coord result = list.get(0);
 		int distance = Math.abs(result.x - this.x) + Math.abs(result.y - this.y);
 		for (Coord coord : list) {
 			if (Math.abs(coord.x - this.x) + Math.abs(coord.y - this.y) < distance) {

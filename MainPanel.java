@@ -2,18 +2,18 @@ import javax.swing.JPanel;
 import java.awt.Graphics;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.Random;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.lang.Math;
-
+import java.util.Collections;
 
 public class MainPanel extends JPanel implements ActionListener {
 	public ControlPanel controlPanel;
 	public InformationPanel informationPanel;
-	public LinkedList<Coord> city;
-	public LinkedList<Coord> path;
+	public ArrayList<Coord> city;
+	public ArrayList<Coord> path;
 	private int large = 10;
 	private Random random = new Random();
 
@@ -25,8 +25,8 @@ public class MainPanel extends JPanel implements ActionListener {
 		this.setSize((int)size.getWidth(), (int)size.getHeight());
 		this.setLocation(location.x, location.y);
 
-		this.city = new LinkedList<Coord>();
-		this.path = new LinkedList<Coord>();
+		this.city = new ArrayList<Coord>();
+		this.path = new ArrayList<Coord>();
 
 		this.controlPanel.button1.addActionListener(this);
 		this.controlPanel.button2.addActionListener(this);
@@ -51,27 +51,27 @@ public class MainPanel extends JPanel implements ActionListener {
 		}
 	}
 
-	public double getPathLength() {
+	public int getPathLength(ArrayList<Coord> path) {
 		double length = 0;
-		if (this.path != null) {
-			if (this.path.size() < 2)
+		if (path != null) {
+			if (path.size() < 2)
 				return 0;
 			else {
-				for (int i = 0; i < this.path.size()-1; i += 1) {
+				for (int i = 0; i < path.size()-1; i += 1) {
 					Coord coordA = path.get(i);
 					Coord coordB = path.get(i+1);
 					length += Math.sqrt(Math.pow(coordA.x-coordB.x, 2) + Math.pow(coordA.y-coordB.y, 2));
 				}
 			}
 		}
-		return length;
+		return (int) length;
 	}
 
-	public void generateCity(int n) {
+	public ArrayList<Coord> generateCity(int n) {
 		int height = this.getHeight()/this.large;
 		int width = this.getWidth()/this.large;
 
-		city = new LinkedList<Coord>();
+		city = new ArrayList<Coord>();
 		int i = 0;
 		while (i != n) {
 			Coord coord = new Coord(this.random.nextInt(width), this.random.nextInt(height));
@@ -81,11 +81,11 @@ public class MainPanel extends JPanel implements ActionListener {
 			}
 		}
 
-		this.city = city;
+		return city;
 	}
 
-	public void randomPath() {
-		path = new LinkedList<Coord>();
+	public ArrayList<Coord> randomPath() {
+		ArrayList<Coord> path = new ArrayList<Coord>();
 		int size = this.city.size();
 
 		int i = 0;
@@ -97,15 +97,14 @@ public class MainPanel extends JPanel implements ActionListener {
 			}
 		}
 
-		this.path = path;
-		this.informationPanel.jLabel.setText((int)this.getPathLength()+" px");
+		return path;
 	}
 
-	public void gluttonPath() {
-		path = new LinkedList<Coord>();
+	public ArrayList<Coord> gluttonPath() {
+		ArrayList<Coord> path = new ArrayList<Coord>();
 		int size = this.city.size();
 
-		LinkedList<Coord> temp = new LinkedList<Coord>();
+		ArrayList<Coord> temp = new ArrayList<Coord>();
 		for (Coord coord : this.city) {
 			Coord copy = new Coord(coord.x, coord.y);
 			temp.add(copy);
@@ -118,12 +117,25 @@ public class MainPanel extends JPanel implements ActionListener {
 			path.add(coord0);
 		}
 
-		this.path = path;
-		this.informationPanel.jLabel.setText((int)this.getPathLength()+" px");
+		return path;
 	}
 
-	public void simulatedAnnealingPath() {
+	public ArrayList<Coord> simulatedAnnealingPath() {
+		ArrayList<Coord> path = this.gluttonPath();
+		double t = 30;
+		int iteration = 9999999;
+		for (int i = 0; i < iteration; i += 1) {
+			int e0 = this.getPathLength(path);
+			int index1 = this.random.nextInt(path.size());
+			int index2 = this.random.nextInt(path.size());
+			Collections.swap(path, index1, index2);
+			int e1 = this.getPathLength(path);
+			if (e1 > e0 && this.random.nextDouble() > Math.exp((e0-e1)/t))
+				Collections.swap(path, index1, index2);
+			t *= 0.90;
+		}
 
+		return path;
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -133,7 +145,7 @@ public class MainPanel extends JPanel implements ActionListener {
 			
 			this.path = null;
 			this.informationPanel.jLabel.setText("");
-			this.generateCity(Integer.parseInt(this.informationPanel.jTextField.getText())); 
+			this.city = this.generateCity(Integer.parseInt(this.informationPanel.jTextField.getText())); 
 			this.repaint();
 		}
 
@@ -141,7 +153,8 @@ public class MainPanel extends JPanel implements ActionListener {
 			this.city != null && 
 			!this.city.isEmpty()) {
 
-			this.randomPath();
+			this.path = this.randomPath();
+			this.informationPanel.jLabel.setText(this.getPathLength(this.path)+" px");
 			this.repaint();
 		}
 
@@ -149,7 +162,8 @@ public class MainPanel extends JPanel implements ActionListener {
 			this.city != null && 
 			!this.city.isEmpty()) {
 
-			this.gluttonPath();
+			this.path = this.gluttonPath();
+			this.informationPanel.jLabel.setText(this.getPathLength(this.path)+" px");
 			this.repaint();
 		}
 
@@ -157,8 +171,10 @@ public class MainPanel extends JPanel implements ActionListener {
 			this.city != null && 
 			!this.city.isEmpty()) {
 
-			this.simulatedAnnealingPath();
+			this.path = this.simulatedAnnealingPath();
+			this.informationPanel.jLabel.setText(this.getPathLength(this.path)+" px");
 			this.repaint();
 		}		
 	}
 }
+
