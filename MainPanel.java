@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.Random;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.lang.Math;
+
 
 public class MainPanel extends JPanel implements ActionListener {
 	public ControlPanel controlPanel;
@@ -49,6 +51,22 @@ public class MainPanel extends JPanel implements ActionListener {
 		}
 	}
 
+	public double getPathLength() {
+		double length = 0;
+		if (this.path != null) {
+			if (this.path.size() < 2)
+				return 0;
+			else {
+				for (int i = 0; i < this.path.size()-1; i += 1) {
+					Coord coordA = path.get(i);
+					Coord coordB = path.get(i+1);
+					length += Math.sqrt(Math.pow(coordA.x-coordB.x, 2) + Math.pow(coordA.y-coordB.y, 2));
+				}
+			}
+		}
+		return length;
+	}
+
 	public void generateCity(int n) {
 		int height = this.getHeight()/this.large;
 		int width = this.getWidth()/this.large;
@@ -80,6 +98,7 @@ public class MainPanel extends JPanel implements ActionListener {
 		}
 
 		this.path = path;
+		this.informationPanel.jLabel.setText((int)this.getPathLength()+" px");
 	}
 
 	public void gluttonPath() {
@@ -100,6 +119,7 @@ public class MainPanel extends JPanel implements ActionListener {
 		}
 
 		this.path = path;
+		this.informationPanel.jLabel.setText((int)this.getPathLength()+" px");
 	}
 
 	public void simulatedAnnealingPath() {
@@ -109,9 +129,10 @@ public class MainPanel extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == this.controlPanel.button1 && 
 			!this.informationPanel.jTextField.getText().equals("") && 
-
 			Integer.parseInt(this.informationPanel.jTextField.getText()) <= this.getWidth()/this.large*this.getHeight()/this.large) {
+			
 			this.path = null;
+			this.informationPanel.jLabel.setText("");
 			this.generateCity(Integer.parseInt(this.informationPanel.jTextField.getText())); 
 			this.repaint();
 		}
