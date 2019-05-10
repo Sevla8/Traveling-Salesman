@@ -10,10 +10,10 @@ public class ControlPanel extends JPanel {
 	public JButton button4;
 
 	public ControlPanel(Coord location, Dimension size, Color background) {
-		this.button1 = new JButton("cas 1");
-		this.button2 = new JButton("cas 2");
-		this.button3 = new JButton("cas 3");
-		this.button4 = new JButton("cas 4");
+		this.button1 = new JButton("Generate cities");
+		this.button2 = new JButton("Random Path");
+		this.button3 = new JButton("Glutton Path");
+		this.button4 = new JButton("Simulated Annealing Path");
 
 		this.add(this.button1);
 		this.add(this.button2);

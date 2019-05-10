@@ -10,10 +10,10 @@ import java.awt.event.ActionEvent;
 public class MainPanel extends JPanel implements ActionListener {
 	public ControlPanel controlPanel;
 	public InformationPanel informationPanel;
-	public LinkedList<Coord> ville;
+	public LinkedList<Coord> city;
 	public LinkedList<Coord> path;
-	public int large = 10;
-	public Random random = new Random();
+	private int large = 10;
+	private Random random = new Random();
 
 	public MainPanel(Coord location, Dimension size, Color background, ControlPanel controlPanel, InformationPanel informationPanel) {
 		this.controlPanel = controlPanel;
@@ -23,7 +23,7 @@ public class MainPanel extends JPanel implements ActionListener {
 		this.setSize((int)size.getWidth(), (int)size.getHeight());
 		this.setLocation(location.x, location.y);
 
-		this.ville = new LinkedList<Coord>();
+		this.city = new LinkedList<Coord>();
 		this.path = new LinkedList<Coord>();
 
 		this.controlPanel.button1.addActionListener(this);
@@ -35,9 +35,9 @@ public class MainPanel extends JPanel implements ActionListener {
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
-		if (this.ville != null && !this.ville.isEmpty()) {
-			g.setColor(Color.RED);
-			for (Coord coord : this.ville) {
+		if (this.city != null && !this.city.isEmpty()) {
+			g.setColor(Color.GRAY);
+			for (Coord coord : this.city) {
 				g.fillOval(coord.x*this.large, coord.y*this.large, this.large, this.large);
 			}
 		}
@@ -53,26 +53,26 @@ public class MainPanel extends JPanel implements ActionListener {
 		int height = this.getHeight()/this.large;
 		int width = this.getWidth()/this.large;
 
-		ville = new LinkedList<Coord>();
+		city = new LinkedList<Coord>();
 		int i = 0;
 		while (i != n) {
 			Coord coord = new Coord(this.random.nextInt(width), this.random.nextInt(height));
-			if (!ville.contains(coord)) {
-				ville.add(coord);
+			if (!city.contains(coord)) {
+				city.add(coord);
 				i += 1;
 			}
 		}
 
-		this.ville = ville;
+		this.city = city;
 	}
 
-	public void findRandomPath() {
+	public void randomPath() {
 		path = new LinkedList<Coord>();
-		int size = this.ville.size();
+		int size = this.city.size();
 
 		int i = 0;
 		while (i != size) {
-			Coord coord = this.ville.get(this.random.nextInt(size));
+			Coord coord = this.city.get(this.random.nextInt(size));
 			if (!path.contains(coord)) {
 				path.add(coord);
 				i += 1; 
@@ -82,38 +82,62 @@ public class MainPanel extends JPanel implements ActionListener {
 		this.path = path;
 	}
 
-	public void glouton() {
+	public void gluttonPath() {
 		path = new LinkedList<Coord>();
-		int size = this.ville.size();
+		int size = this.city.size();
 
-		Coord coord = this.ville.get(this.random.nextInt(size));
-		path.add(coord);
-		for (int i = 0; i < this.ville.size()-1; i += 1) {
-			Coord coord = this.ville.get(i);
-			if (!path.contains(coord)) {
-				path.add(coord);
-				i += 1; 
-			}
+		LinkedList<Coord> temp = new LinkedList<Coord>();
+		for (Coord coord : this.city) {
+			Coord copy = new Coord(coord.x, coord.y);
+			temp.add(copy);
+		}
+
+		Coord coord0 = temp.remove(this.random.nextInt(size));
+		path.add(coord0);
+		while (!temp.isEmpty()) {
+			coord0 = temp.remove(coord0.getNearest(temp));
+			path.add(coord0);
 		}
 
 		this.path = path;
+	}
+
+	public void simulatedAnnealingPath() {
+
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == this.controlPanel.button1 && !this.informationPanel.jTextField.getText().equals("")) {
+		if (e.getSource() == this.controlPanel.button1 && 
+			!this.informationPanel.jTextField.getText().equals("") && 
+
+			Integer.parseInt(this.informationPanel.jTextField.getText()) <= this.getWidth()/this.large*this.getHeight()/this.large) {
 			this.path = null;
 			this.generateCity(Integer.parseInt(this.informationPanel.jTextField.getText())); 
 			this.repaint();
 		}
 
-		else if (e.getSource() == this.controlPanel.button2 && this.ville != null && !this.ville.isEmpty()) {
-			this.findRandomPath();
+		if (e.getSource() == this.controlPanel.button2 && 
+			this.city != null && 
+			!this.city.isEmpty()) {
+
+			this.randomPath();
 			this.repaint();
 		}
 
-		else if (e.getSource() == this.controlPanel.button3 && this.ville != null && !this.ville.isEmpty()) {
-			this.glouton();
+		if (e.getSource() == this.controlPanel.button3 && 
+			this.city != null && 
+			!this.city.isEmpty()) {
+
+			this.gluttonPath();
 			this.repaint();
 		}
+
+		if (e.getSource() == this.controlPanel.button4 && 
+			this.city != null && 
+			!this.city.isEmpty()) {
+
+			this.simulatedAnnealingPath();
+			this.repaint();
+		}		
 	}
 }

@@ -1,3 +1,6 @@
+import java.util.LinkedList;
+import java.lang.Math;
+
 public class Coord {
 	public int x;
 	public int y;
@@ -5,6 +8,18 @@ public class Coord {
 	public Coord(int x, int y) {
 		this.x = x;
 		this.y = y;
+	}
+
+	public int getNearest(LinkedList<Coord> list) {
+		Coord result = list.getFirst();
+		int distance = Math.abs(result.x - this.x) + Math.abs(result.y - this.y);
+		for (Coord coord : list) {
+			if (Math.abs(coord.x - this.x) + Math.abs(coord.y - this.y) < distance) {
+				distance = Math.abs(coord.x - this.x) + Math.abs(coord.y - this.y);
+				result = coord;
+			}
+		}
+		return list.indexOf(result);
 	}
 
 	public boolean equals(Object object) {
